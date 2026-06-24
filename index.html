@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  .cos-num{ background:transparent; border:none; outline:none; font-family:'JetBrains Mono',monospace; font-weight:800; color:#A82B26; text-align:right; padding:0; border-bottom:1px dashed #D9B4B0; }
+  .cos-num:focus{ border-bottom-color:#A82B26; }
+  .cos-num::-webkit-outer-spin-button,.cos-num::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .cos-ta{ width:100%; resize:none; border:1.5px solid #E0D8C8; border-radius:9px; background:#FBFAF4; padding:9px 11px; font-family:'Noto Sans TC',sans-serif; font-size:11.5px; color:#3A372F; outline:none; line-height:1.5; }
+  .cos-ta:focus{ border-color:#C9A0A0; }
+  .cos-eco{ background:transparent; border:none; outline:none; font-family:'JetBrains Mono',monospace; font-weight:800; color:#F0D98C; text-align:left; padding:0; border-bottom:1px dashed rgba(240,217,140,.5); width:96px; }
+  @keyframes cos-spin{ to{ transform:rotate(360deg); } }
+  @keyframes cos-blink{ 50%{ opacity:0; } }
+  @media (max-width:900px){ .cos-grid,.cos-eco-grid{ grid-template-columns:1fr !important; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; padding:42px 24px; display:flex; align-items:center; justify-content:center; background:radial-gradient(1300px 760px at 70% -10%, #EFEADD 0%, #E5DFD0 55%, #DBD3C0 100%); font-family:'JetBrains Mono','Noto Sans TC',ui-monospace,monospace; color:#2A2823;">
+
+  <div style="width:1120px; max-width:100%; background:#F5F1E8; border-radius:22px; overflow:hidden; box-shadow:0 44px 80px -32px rgba(70,46,20,.42), 0 1.5px 0 #FFFDF7 inset, 0 0 0 1px #E5DECE;">
+
+    <!-- HEADER -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 28px; background:#F8F5EE; border-bottom:2px solid #A82B26;">
+      <div style="display:flex; align-items:center; gap:11px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A82B26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2.5"/><path d="M7 9l3 3-3 3"/><path d="M13.5 15H17"/></svg>
+        <span style="font-weight:800; font-size:14px; letter-spacing:1.6px; white-space:nowrap;">GENAI · CALC-OS</span>
+        <span style="font-size:11px; font-weight:500; color:#9A9384; letter-spacing:.3px; white-space:nowrap;">工程 ↔ 業務 翻譯機</span>
+        <span style="font-size:9.5px; font-weight:500; color:#B3AC9C; letter-spacing:.3px; white-space:nowrap;">計價基準 2025.06</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; background:#EDE7DA; border-radius:8px; padding:2px; border:1.5px solid #E0D8C8;">
+          <sc-for list="{{ currencies }}" as="c" hint-placeholder-count="2">
+            <div onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</div>
+          </sc-for>
+        </div>
+        <span style="font-size:9.5px; font-weight:700; letter-spacing:1.3px; color:#A82B26; border:1.5px solid #E1B8B4; background:#FBF1F0; padding:4px 9px; border-radius:6px; white-space:nowrap;">示意值 · ILLUSTRATIVE</span>
+      </div>
+    </div>
+
+    <!-- SCENARIO BAR (language bridge) -->
+    <div style="padding:18px 28px; background:#F1ECE0; border-bottom:1px solid #E4DDCD;">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:13px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A82B26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
+        <span style="font-size:12px; font-weight:700; letter-spacing:1.3px;">①  業務情境</span>
+        <span style="font-size:11px; color:#9A9384; font-weight:500;">先選你的真實場景，不用懂 token</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1.35fr 1fr; gap:18px;">
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start;">
+          <sc-for list="{{ scenarios }}" as="sc" hint-placeholder-count="6">
+            <div onClick="{{ sc.onClick }}" style="{{ sc.style }}">{{ sc.label }}</div>
+          </sc-for>
+        </div>
+        <div>
+          <textarea class="cos-ta" rows="2" placeholder="或貼上一段真實對話 / 文件，自動估算 token…" onInput="{{ onPaste }}"></textarea>
+          <div style="margin-top:5px; font-size:10px; color:#9A9384; font-weight:500;">{{ pasteHint }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="cos-grid" style="display:grid; grid-template-columns:1.02fr 0.98fr;">
+
+      <!-- LEFT : ENGINEER INPUTS -->
+      <div style="padding:20px 28px 24px;">
+
+        <!-- MODEL SELECT -->
+        <div style="display:flex; align-items:center; gap:9px; margin-bottom:13px;">
+          <span style="font-size:12px; font-weight:700; letter-spacing:1.3px; white-space:nowrap;">②  MODEL</span>
+          <span style="font-size:11px; color:#9A9384; font-weight:500;">模型</span>
+          <span style="margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:10px; font-weight:700; letter-spacing:.5px; color:#A82B26; white-space:nowrap;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="#A82B26" stroke="none"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 18.6 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>推薦 {{ recName }}
+          </span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:9px;">
+          <sc-for list="{{ vendorGroups }}" as="vg" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:13px;">
+              <span style="width:52px; flex-shrink:0; font-size:10px; font-weight:700; letter-spacing:1.2px; color:#9A9384;">{{ vg.vendor }}</span>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <sc-for list="{{ vg.models }}" as="m" hint-placeholder-count="2">
+                  <div onClick="{{ m.onClick }}" style="{{ m.style }}">
+                    <span>{{ m.name }}</span>
+                    <sc-if value="{{ m.rec }}" hint-placeholder-val="{{ false }}">
+                      <span style="width:5px; height:5px; border-radius:50%; background:#A82B26;"></span>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="height:1px; background:#E4DDCD; margin:18px 0;"></div>
+
+        <!-- PARAMETERS -->
+        <div style="display:flex; align-items:center; gap:9px; margin-bottom:14px;">
+          <span style="font-size:12px; font-weight:700; letter-spacing:1.3px; white-space:nowrap;">③  PARAMETERS</span>
+          <span style="font-size:11px; color:#9A9384; font-weight:500;">技術參數（自動換算）</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:13px;">
+          <sc-for list="{{ sliders }}" as="s" hint-placeholder-count="4">
+            <div>
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:7px;">
+                <div>
+                  <div style="font-size:9px; font-weight:700; letter-spacing:1.2px; color:#A39B8B;">{{ s.code }}<span style="color:#C6BEAE;"> · {{ s.scaleTag }}</span></div>
+                  <div style="font-size:12.5px; font-weight:700; margin-top:2px; white-space:nowrap;">{{ s.cn }}<span style="font-size:10px; font-weight:400; color:#9A9384;"> · {{ s.hint }}</span></div>
+                </div>
+                <div style="display:flex; align-items:baseline; gap:3px; white-space:nowrap;">
+                  <input class="cos-num" type="text" inputmode="numeric" value="{{ s.value }}" onChange="{{ s.onInput }}" style="font-size:17px; width:82px;" />
+                  <span style="font-size:10px; font-weight:700; color:#C6BEAE;">{{ s.unit }}</span>
+                </div>
+              </div>
+              <div onPointerDown="{{ s.down }}" onPointerMove="{{ s.move }}" onPointerUp="{{ s.up }}" style="position:relative; height:22px; cursor:pointer; touch-action:none; user-select:none;">
+                <div style="position:absolute; top:50%; left:0; right:0; height:6px; transform:translateY(-50%); background:#DCD5C6; border-radius:3px; box-shadow:inset 0 1px 2px rgba(90,70,40,.16);"></div>
+                <div style="position:absolute; top:50%; left:0; height:6px; transform:translateY(-50%); width:{{ s.fill }}%; background:linear-gradient(#B6332C,#9A241F); border-radius:3px;"></div>
+                <div style="position:absolute; top:50%; left:{{ s.fill }}%; width:16px; height:22px; transform:translate(-50%,-50%); background:#FBF8F1; border:1.5px solid #A82B26; border-bottom-width:3px; border-radius:5px; box-shadow:0 2px 4px rgba(120,40,30,.26);"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:9px; color:#B3AC9C; font-weight:500; letter-spacing:.4px;">
+                <span>{{ s.minLabel }}</span>
+                <sc-if value="{{ s.isTps }}" hint-placeholder-val="{{ false }}"><span style="color:#A82B26; font-weight:700;">模型預設 {{ s.tpsDefault }}</span></sc-if>
+                <span>{{ s.maxLabel }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- OPTIONS -->
+        <div style="margin-top:16px; display:flex; gap:10px;">
+          <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="2">
+            <div onClick="{{ t.onClick }}" style="{{ t.wrap }}">
+              <div style="{{ t.knob }}"></div>
+              <div style="line-height:1.25;">
+                <div style="font-size:11px; font-weight:700;">{{ t.title }}</div>
+                <div style="font-size:9px; font-weight:500; color:#9A9384;">{{ t.sub }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+      </div>
+
+      <!-- RIGHT : ENGINEER OUTPUT + UX SIM -->
+      <div style="padding:20px 28px 24px; background:#EDE8DC; border-left:2px dashed #D8D1C1;">
+
+        <!-- LCD -->
+        <div style="background:linear-gradient(158deg,#ABB389 0%,#9BA478 100%); border-radius:16px; padding:16px 18px 18px; color:#293015; box-shadow:inset 0 2px 7px rgba(45,55,22,.3), inset 0 0 0 2px rgba(255,255,255,.15), 0 6px 14px -7px rgba(70,80,40,.4);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:10.5px; font-weight:700; letter-spacing:1.9px; color:#3C461F;">④  SYS.OUTPUT</span>
+            <svg width="17" height="13" viewBox="0 0 24 18" fill="none" stroke="#3C461F" stroke-width="2" stroke-linecap="round"><path d="M2 7a14 14 0 0 1 20 0"/><path d="M5.5 11a9 9 0 0 1 13 0"/><circle cx="12" cy="15" r="1.5" fill="#3C461F" stroke="none"/></svg>
+          </div>
+          <div style="height:1px; background:repeating-linear-gradient(90deg,#3C461F 0 5px,transparent 5px 9px); opacity:.5; margin:11px 0 12px;"></div>
+
+          <div style="font-size:10.5px; font-weight:700; letter-spacing:1.4px; color:#3C461F;">單筆延遲 · LATENCY</div>
+          <div style="display:flex; align-items:flex-end; gap:8px; margin-top:3px;">
+            <span style="font-size:48px; font-weight:800; line-height:.9; letter-spacing:-1px;">{{ latencyLabel }}</span>
+            <span style="font-size:20px; font-weight:700; margin-bottom:5px;">s</span>
+            <span style="margin-left:auto; margin-bottom:8px; font-size:11px; font-weight:700; letter-spacing:.6px; padding:4px 10px; border-radius:6px; color:{{ vColor }}; background:{{ vChipBg }};">{{ vLabel }}</span>
+          </div>
+          <div style="font-size:10.5px; font-weight:500; color:#3C461F; margin-top:4px; letter-spacing:.2px;">{{ breakdown }}</div>
+
+          <div style="display:flex; gap:3px; margin:12px 0 14px;">
+            <sc-for list="{{ segs }}" as="g" hint-placeholder-count="14">
+              <div style="flex:1; height:11px; border-radius:2px; background:{{ g.color }};"></div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+            <div style="background:#2E3719; border-radius:10px; padding:10px 12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;"><span style="font-size:9px; font-weight:700; letter-spacing:1.1px; color:#9FAA77;">COST / REQ</span><span style="{{ saveBadge }}">{{ saveLabel }}</span></div>
+              <div style="font-size:9px; color:#7E8A58; margin-top:1px;">單筆成本</div>
+              <div style="font-size:20px; font-weight:800; color:#D3DCAE; margin-top:5px; letter-spacing:.3px;">{{ costLabel }}</div>
+            </div>
+            <div style="background:#2E3719; border-radius:10px; padding:10px 12px;">
+              <div style="font-size:9px; font-weight:700; letter-spacing:1.1px; color:#9FAA77;">MONTHLY</div>
+              <div style="font-size:9px; color:#7E8A58; margin-top:1px;">每月總成本</div>
+              <div style="font-size:20px; font-weight:800; color:#D3DCAE; margin-top:5px; letter-spacing:.3px;">{{ monthlyLabel }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UX SIMULATOR (experience bridge) -->
+        <div style="margin-top:15px; background:#211E1A; border-radius:14px; padding:14px 16px 16px; box-shadow:0 8px 18px -10px rgba(30,20,10,.5);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="display:flex; gap:5px;"><span style="width:9px;height:9px;border-radius:50%;background:#E0685B;"></span><span style="width:9px;height:9px;border-radius:50%;background:#E3B341;"></span><span style="width:9px;height:9px;border-radius:50%;background:#7FB286;"></span></span>
+              <span style="font-size:10.5px; font-weight:700; letter-spacing:1px; color:#C9C2B2;">⑤  客戶體驗模擬</span>
+            </div>
+            <div onClick="{{ runSim }}" style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:11px; font-weight:700; letter-spacing:.4px; color:#211E1A; background:#C8D49A; padding:6px 12px; border-radius:8px;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="#211E1A" stroke="none"><path d="M7 5v14l11-7z"/></svg>{{ simBtn }}
+            </div>
+          </div>
+          <div style="margin-top:12px; min-height:78px; background:#17150F; border:1px solid #34302A; border-radius:10px; padding:11px 13px; font-family:'Noto Sans TC',sans-serif; font-size:12px; line-height:1.65; color:#D8D2C4;">
+            <div style="font-size:9.5px; font-weight:700; letter-spacing:.5px; color:#7C766A; margin-bottom:6px; font-family:'JetBrains Mono',monospace;">{{ simStatus }}</div>
+            <sc-if value="{{ simWaiting }}" hint-placeholder-val="{{ false }}">
+              <span style="display:inline-block; width:14px; height:14px; border:2px solid #4A463D; border-top-color:#C8D49A; border-radius:50%; animation:cos-spin .7s linear infinite; vertical-align:middle;"></span>
+              <span style="color:#8A8478; margin-left:8px;">思考中…（首字延遲 {{ ttftLabel }}s）</span>
+            </sc-if>
+            <span>{{ simText }}</span><sc-if value="{{ simTyping }}" hint-placeholder-val="{{ false }}"><span style="display:inline-block; width:7px; height:14px; background:#C8D49A; vertical-align:text-bottom; animation:cos-blink .9s step-end infinite;"></span></sc-if>
+          </div>
+        </div>
+
+        <!-- DEPLOY VERDICT -->
+        <div style="margin-top:15px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <span style="font-size:11px; font-weight:700; letter-spacing:1px; white-space:nowrap;">DEPLOY MODE · 部署建議</span>
+            <span style="font-size:11px; font-weight:700; letter-spacing:.5px; padding:4px 10px; border-radius:6px; color:{{ vColor }}; background:{{ vChipBg }};">{{ vLabel }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin:11px 0 6px; font-size:9px; font-weight:700; letter-spacing:.5px; color:#9A9384;">
+            <span>即時 REAL-TIME</span><span>批次 BATCH</span>
+          </div>
+          <div style="position:relative; height:11px; border-radius:6px; background:repeating-linear-gradient(90deg,#E4DDCC 0 4px,transparent 4px 8px); box-shadow:inset 0 0 0 1.5px #E4DDCC;">
+            <div style="position:absolute; top:0; left:0; height:11px; width:{{ verdictFill }}%; background:{{ vBarColor }}; border-radius:6px;"></div>
+            <div style="position:absolute; top:50%; left:33.3%; width:1.5px; height:15px; transform:translate(-50%,-50%); background:#C7BFAE;"></div>
+            <div style="position:absolute; top:50%; left:66.6%; width:1.5px; height:15px; transform:translate(-50%,-50%); background:#C7BFAE;"></div>
+          </div>
+          <p style="margin:11px 0 0; font-family:'Noto Sans TC',sans-serif; font-size:11.5px; line-height:1.7; color:#5C5648;">{{ hintText }}</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- UNIT ECONOMICS BAND (value bridge) -->
+    <div style="background:linear-gradient(150deg,#2A2620 0%,#211E18 100%); padding:20px 28px 22px; color:#EFE9DB;">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:15px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E3B341" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span style="font-size:12px; font-weight:700; letter-spacing:1.3px; color:#F0D98C;">⑥  商業價值 · UNIT ECONOMICS</span>
+        <span style="font-size:11px; color:#9C9482; font-weight:500;">給主管看的那一行</span>
+      </div>
+
+      <div class="cos-eco-grid" style="display:grid; grid-template-columns:0.85fr 1.15fr; gap:26px; align-items:center;">
+
+        <!-- inputs -->
+        <div style="display:flex; flex-direction:column; gap:13px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div style="line-height:1.3;">
+              <div style="font-size:12px; font-weight:700;">人工每筆成本</div>
+              <div style="font-size:9.5px; color:#9C9482; font-weight:500;">一通電話 / 一張工單的人力</div>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:4px; white-space:nowrap;">
+              <span style="font-size:11px; font-weight:700; color:#9C9482;">{{ sym }}</span>
+              <input class="cos-eco" type="text" inputmode="numeric" value="{{ humanInput }}" onChange="{{ onHuman }}" style="font-size:18px;" />
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <div style="line-height:1.3;">
+              <div style="font-size:12px; font-weight:700;">客單價<span style="font-size:9.5px; color:#9C9482; font-weight:500;"> · 選填</span></div>
+              <div style="font-size:9.5px; color:#9C9482; font-weight:500;">0 = 不計算佔比</div>
+            </div>
+            <div style="display:flex; align-items:baseline; gap:4px; white-space:nowrap;">
+              <span style="font-size:11px; font-weight:700; color:#9C9482;">{{ sym }}</span>
+              <input class="cos-eco" type="text" inputmode="numeric" value="{{ revInput }}" onChange="{{ onRev }}" style="font-size:18px;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- outputs -->
+        <div style="display:flex; flex-direction:column; gap:13px;">
+          <div style="display:flex; gap:12px;">
+            <div style="flex:1; background:rgba(255,253,247,.05); border:1px solid rgba(240,217,140,.18); border-radius:11px; padding:11px 14px;">
+              <div style="font-size:9.5px; font-weight:700; letter-spacing:.6px; color:#9C9482;">AI 每筆成本</div>
+              <div style="font-size:24px; font-weight:800; color:#F0D98C; margin-top:5px; letter-spacing:.3px;">{{ aiPerLabel }}</div>
+            </div>
+            <div style="flex:2; display:flex; align-items:center; gap:13px; background:rgba(159,212,158,.07); border:1px solid {{ leverBd }}; border-radius:11px; padding:10px 15px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ leverIcon }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M14.5 2 4 14h7l-1.5 8L20 10h-7z"/></svg>
+              <div style="line-height:1.45;">
+                <div style="font-size:13px; font-weight:800; color:{{ leverIcon }}; letter-spacing:.2px;">{{ leverHead }}</div>
+                <div style="font-family:'Noto Sans TC',sans-serif; font-size:10.5px; font-weight:500; color:#B6AE9C; margin-top:2px;">{{ leverSub }}</div>
+              </div>
+            </div>
+          </div>
+          <div style="background:{{ verdictBoxBg }}; border:1px solid {{ verdictBoxBd }}; border-radius:11px; padding:12px 15px;">
+            <div style="font-family:'Noto Sans TC',sans-serif; font-size:13px; font-weight:700; line-height:1.6; color:#F2ECDE;">{{ ecoHeadline }}</div>
+            <div style="font-family:'Noto Sans TC',sans-serif; font-size:11px; line-height:1.6; color:#B6AE9C; margin-top:3px;">{{ ecoSub }}</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1120,&quot;height&quot;:960},&quot;defaultModel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;claude-haiku&quot;,&quot;claude-sonnet&quot;,&quot;claude-opus&quot;,&quot;gemini-flash&quot;,&quot;gemini-pro&quot;,&quot;gpt-mini&quot;,&quot;gpt-4o&quot;],&quot;default&quot;:&quot;claude-haiku&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;monthlyVolume&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:50000,&quot;min&quot;:100,&quot;max&quot;:5000000,&quot;step&quot;:100,&quot;tsType&quot;:&quot;number&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;USD&quot;,&quot;TWD&quot;],&quot;default&quot;:&quot;TWD&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  REC = 'claude-haiku';
+  VENDOR_ORDER = ['Claude','Gemini','GPT'];
+  CATALOG = {
+    'claude-haiku':  { vendor:'Claude', name:'Haiku',   inP:0.25,  outP:1.25,  tps:150, ttft:0.4, prefill:3000 },
+    'claude-sonnet': { vendor:'Claude', name:'Sonnet',  inP:3.00,  outP:15.00, tps:75,  ttft:0.6, prefill:2200 },
+    'claude-opus':   { vendor:'Claude', name:'Opus',    inP:15.00, outP:75.00, tps:42,  ttft:1.1, prefill:1400 },
+    'gemini-flash':  { vendor:'Gemini', name:'Flash',   inP:0.075, outP:0.30,  tps:185, ttft:0.35,prefill:3200 },
+    'gemini-pro':    { vendor:'Gemini', name:'Pro',     inP:1.25,  outP:5.00,  tps:90,  ttft:0.7, prefill:2000 },
+    'gpt-mini':      { vendor:'GPT',    name:'4o-mini', inP:0.15,  outP:0.60,  tps:160, ttft:0.4, prefill:3000 },
+    'gpt-4o':        { vendor:'GPT',    name:'4o',      inP:2.50,  outP:10.00, tps:85,  ttft:0.6, prefill:2300 },
+  };
+  RANGES = {
+    inTok:  { min:100, max:1000000, log:true,  unit:'tok' },
+    outTok: { min:50,  max:8000,    log:true,  unit:'tok' },
+    tps:    { min:10,  max:300,     log:false, unit:'t/s' },
+    volume: { min:100, max:5000000, log:true,  unit:'/mo' },
+  };
+  META = {
+    inTok:  { code:'INPUT',  cn:'輸入 token', hint:'對話/文件長度' },
+    outTok: { code:'OUTPUT', cn:'輸出 token', hint:'摘要長度' },
+    tps:    { code:'TPS',    cn:'生成速度',   hint:'字 / 秒' },
+    volume: { code:'VOLUME', cn:'每月案件量', hint:'筆 / 月' },
+  };
+  SCENARIOS = [
+    { id:'cs',    label:'客服問答',    inTok:700,   outTok:200 },
+    { id:'email', label:'Email 回覆',  inTok:1500,  outTok:400 },
+    { id:'copy',  label:'商品文案',    inTok:400,   outTok:600 },
+    { id:'pdf',   label:'50頁PDF總結',  inTok:60000, outTok:800 },
+    { id:'code',  label:'程式碼分析',  inTok:25000, outTok:1200 },
+    { id:'custom',label:'自訂',        inTok:null,  outTok:null },
+  ];
+  FX = 32.5;
+  SAMPLE = '【通話摘要】客戶反映本月帳單多出 NT$320，經查為國際漫遊費用。已協助關閉漫遊並送出補償申請，預計三個工作天回覆。';
+
+  state = {
+    model: this.CATALOG[this.props.defaultModel] ? this.props.defaultModel : this.REC,
+    scenario: 'cs',
+    inTok: 700,
+    outTok: 200,
+    tps: (this.CATALOG[this.props.defaultModel] || this.CATALOG[this.REC]).tps,
+    volume: this.props.monthlyVolume || 50000,
+    batch: false,
+    cache: false,
+    currency: (this.props.currency === 'USD' || this.props.currency === 'TWD') ? this.props.currency : 'TWD',
+    humanUSD: 50 / 32.5,
+    revenueUSD: 0,
+    pasteN: 0,
+    simPhase: 'idle',
+    simText: '',
+  };
+
+  componentWillUnmount(){ this.stopSim(); }
+
+  selectModel(key){
+    const m = this.CATALOG[key];
+    if(!m) return;
+    this.setState({ model:key, tps:m.tps });
+  }
+  selectScenario(id){
+    const sc = this.SCENARIOS.find(s=>s.id===id);
+    if(!sc) return;
+    if(sc.inTok == null){ this.setState({ scenario:id }); return; }
+    this.setState({ scenario:id, inTok:sc.inTok, outTok:sc.outTok });
+  }
+  setCurrency(c){ this.setState({ currency:c }); }
+  reset(){
+    this.setState({ model:this.REC, scenario:'cs', inTok:700, outTok:200, tps:this.CATALOG[this.REC].tps, volume:50000, batch:false, cache:false });
+  }
+
+  estimateTokens(text){
+    if(!text) return 0;
+    const cjk = (text.match(/[\u3400-\u9FFF\uF900-\uFAFF\u3000-\u303F\uFF00-\uFFEF]/g) || []).length;
+    const other = text.length - cjk;
+    return Math.round(cjk * 1.8 + other / 4);
+  }
+  onPaste(e){
+    const txt = e.target.value || '';
+    if(!txt.trim()){ this.setState({ pasteN:0 }); return; }
+    const n = Math.max(this.RANGES.inTok.min, Math.min(this.RANGES.inTok.max, this.estimateTokens(txt)));
+    this.setState({ inTok:n, scenario:'custom', pasteN:n });
+  }
+
+  fillOf(key){
+    const rg = this.RANGES[key], v = this.state[key];
+    let f = rg.log ? Math.log(v/rg.min)/Math.log(rg.max/rg.min) : (v-rg.min)/(rg.max-rg.min);
+    return Math.round(Math.max(0,Math.min(1,f))*1000)/10;
+  }
+  valueAt(key,f){
+    const rg = this.RANGES[key];
+    f = Math.max(0,Math.min(1,f));
+    let v = rg.log ? rg.min*Math.pow(rg.max/rg.min,f) : rg.min+f*(rg.max-rg.min);
+    return this.niceRound(v);
+  }
+  niceRound(v){
+    if(v<1000) return Math.max(1,Math.round(v/10)*10);
+    if(v<100000) return Math.round(v/100)*100;
+    return Math.round(v/1000)*1000;
+  }
+  setParam(key,v){
+    const rg = this.RANGES[key];
+    v = Math.max(rg.min, Math.min(rg.max, v));
+    const patch = { [key]: v };
+    if(key==='inTok' || key==='outTok') patch.scenario = 'custom';
+    this.setState(patch);
+  }
+  onDown(key,e){ try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(_){} this._track=e.currentTarget; this._key=key; this.applyX(e.clientX); }
+  onMove(e){ if(this._track && (e.buttons & 1)) this.applyX(e.clientX); }
+  onUp(e){ try{ e.currentTarget.releasePointerCapture(e.pointerId); }catch(_){} this._track=null; this._key=null; }
+  applyX(x){
+    if(!this._track || !this._key) return;
+    const r = this._track.getBoundingClientRect();
+    this.setParam(this._key, this.valueAt(this._key, (x-r.left)/r.width));
+  }
+  onTyped(key,e){
+    let n = parseInt(String(e.target.value).replace(/[^0-9]/g,''),10);
+    if(isNaN(n)) n = this.RANGES[key].min;
+    this.setParam(key, n);
+  }
+
+  money(usd){
+    const tw = this.state.currency==='TWD';
+    const sym = tw?'NT$':'$';
+    if(tw){ const t=usd*this.FX; if(t>=100) return sym+Math.round(t).toLocaleString('en-US'); if(t>=1) return sym+t.toFixed(1); return sym+t.toFixed(2); }
+    if(usd>=1) return sym+usd.toFixed(2);
+    if(usd>=0.001) return sym+usd.toFixed(4);
+    return sym+usd.toFixed(5);
+  }
+  moneyBig(usd){
+    const tw = this.state.currency==='TWD';
+    const sym = tw?'NT$':'$';
+    const t = tw ? usd*this.FX : usd;
+    if(t>=10) return sym+Math.round(t).toLocaleString('en-US');
+    return sym+t.toFixed(2);
+  }
+  compact(n){ if(n>=1e6) return (n/1e6)+'M'; if(n>=1e3) return (n/1e3)+'k'; return ''+n; }
+
+  calc(){
+    const S=this.state, M=this.CATALOG[S.model];
+    let prefillTok = S.inTok, inMult = 1;
+    if(S.cache){ inMult = 0.2 + 0.8*0.1; prefillTok = S.inTok*0.28; }
+    const ttft = M.ttft + prefillTok/M.prefill;
+    const gen = S.outTok/S.tps;
+    const total = ttft + gen;
+    let cost = (S.inTok/1e6)*M.inP*inMult + (S.outTok/1e6)*M.outP;
+    if(S.batch) cost *= 0.5;
+    return { ttft, gen, total, cost };
+  }
+
+  stopSim(){ clearTimeout(this._t1); clearInterval(this._iv); }
+  runSim(){
+    this.stopSim();
+    const { ttft, gen } = this.calc();
+    const sample = this.SAMPLE, n = sample.length;
+    const waitMs = Math.min(Math.max(ttft,0.2), 5)*1000;
+    const typeMs = Math.min(Math.max(gen,0.6), 5)*1000;
+    this.setState({ simPhase:'wait', simText:'' });
+    this._t1 = setTimeout(()=>{
+      this.setState({ simPhase:'type' });
+      let i=0; const per = Math.max(typeMs/n, 14);
+      this._iv = setInterval(()=>{
+        i++; this.setState({ simText: sample.slice(0,i) });
+        if(i>=n){ clearInterval(this._iv); this.setState({ simPhase:'done' }); }
+      }, per);
+    }, waitMs);
+  }
+
+  onHuman(e){
+    let n = parseFloat(String(e.target.value).replace(/[^0-9.]/g,''));
+    if(isNaN(n)||n<0) n=0;
+    this.setState({ humanUSD: this.state.currency==='TWD' ? n/this.FX : n });
+  }
+  onRev(e){
+    let n = parseFloat(String(e.target.value).replace(/[^0-9.]/g,''));
+    if(isNaN(n)||n<0) n=0;
+    this.setState({ revenueUSD: this.state.currency==='TWD' ? n/this.FX : n });
+  }
+
+  renderVals(){
+    const S=this.state, M=this.CATALOG[S.model];
+    const { ttft, gen, total, cost } = this.calc();
+
+    let v;
+    if(S.batch)            v={ label:'批次模式', color:'#2E7D32', chip:'rgba(46,125,50,.13)', bar:'#3F9C44' };
+    else if(total<=2)      v={ label:'即時可用', color:'#2E7D32', chip:'rgba(46,125,50,.13)', bar:'#3F9C44' };
+    else if(total<=4)      v={ label:'可接受',   color:'#B0791A', chip:'rgba(176,121,26,.15)', bar:'#D08A1E' };
+    else                   v={ label:'建議批次', color:'#A82B26', chip:'rgba(168,43,38,.12)', bar:'#BE3329' };
+
+    const latNorm = Math.max(0, Math.min(1, total/6));
+    const verdictFill = S.batch ? 92 : Math.round(latNorm*1000)/10;
+    const segN=14, segOn = S.batch ? segN : Math.round(latNorm*segN);
+    const segs=[]; for(let i=0;i<segN;i++) segs.push({ color: i<segOn ? v.bar : 'rgba(42,50,23,.18)' });
+
+    const sliders = Object.keys(this.RANGES).map(key=>{
+      const rg=this.RANGES[key];
+      return {
+        key, code:this.META[key].code, cn:this.META[key].cn, hint:this.META[key].hint,
+        unit:rg.unit, scaleTag: rg.log?'LOG':'LIN',
+        value:S[key], fill:this.fillOf(key),
+        minLabel:this.compact(rg.min), maxLabel:this.compact(rg.max),
+        isTps: key==='tps', tpsDefault: M.tps,
+        down:(e)=>this.onDown(key,e), move:(e)=>this.onMove(e), up:(e)=>this.onUp(e),
+        onInput:(e)=>this.onTyped(key,e),
+      };
+    });
+
+    const pillBase={ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 12px', borderRadius:'10px', fontSize:'12.5px', fontWeight:700, cursor:'pointer', border:'1.5px solid #DDD6C8', borderBottomWidth:'3px', borderBottomColor:'#C7BFAE', background:'#F8F5EE', color:'#3A372F', transition:'all .12s ease', fontFamily:"'JetBrains Mono','Noto Sans TC',monospace" };
+    const pillSel={ ...pillBase, border:'1.5px solid #A82B26', borderBottomWidth:'3px', borderBottomColor:'#87211A', background:'#F0EADF', color:'#A82B26', boxShadow:'inset 0 2px 5px rgba(130,32,24,.16)' };
+    const vendorGroups = this.VENDOR_ORDER.map(vendor=>({
+      vendor,
+      models: Object.keys(this.CATALOG).filter(id=>this.CATALOG[id].vendor===vendor).map(id=>({
+        id, name:this.CATALOG[id].name, rec:id===this.REC, onClick:()=>this.selectModel(id), style: id===S.model?pillSel:pillBase,
+      })),
+    }));
+    const recName = this.CATALOG[this.REC].vendor+' '+this.CATALOG[this.REC].name;
+
+    const scBase={ padding:'7px 13px', borderRadius:'9px', fontSize:'12px', fontWeight:700, cursor:'pointer', border:'1.5px solid #E0D8C8', background:'#FBFAF4', color:'#3A372F', fontFamily:"'JetBrains Mono','Noto Sans TC',monospace", transition:'all .12s ease' };
+    const scSel={ ...scBase, border:'1.5px solid #A82B26', background:'#A82B26', color:'#FBF8F1' };
+    const scenarios = this.SCENARIOS.map(sc=>({ id:sc.id, label:sc.label, onClick:()=>this.selectScenario(sc.id), style: sc.id===S.scenario?scSel:scBase }));
+    const pasteHint = S.pasteN>0 ? ('≈ '+S.pasteN.toLocaleString('en-US')+' tokens → 已帶入輸入長度') : 'CJK 字數 × ~1.8 估算';
+
+    const curBase={ padding:'4px 11px', borderRadius:'6px', fontSize:'11px', fontWeight:700, letterSpacing:'.5px', cursor:'pointer', color:'#8A8472' };
+    const curSel={ ...curBase, background:'#A82B26', color:'#FBF8F1' };
+    const currencies = ['USD','TWD'].map(c=>({ label:c, onClick:()=>this.setCurrency(c), style: c===S.currency?curSel:curBase }));
+
+    const mkToggle=(on,title,sub,onClick)=>({
+      title, sub, onClick,
+      wrap: { flex:'1', display:'flex', alignItems:'center', gap:'10px', padding:'9px 12px', borderRadius:'11px', cursor:'pointer', border:on?'1.5px solid #A82B26':'1.5px solid #DDD6C8', background:on?'#F0EADF':'#F8F5EE', transition:'all .12s ease' },
+      knob: { width:'30px', height:'18px', borderRadius:'10px', flexShrink:0, background:on?'#A82B26':'#CFC7B6', boxShadow: on?'none':'inset 0 1px 2px rgba(0,0,0,.12)', transition:'all .14s ease', backgroundImage: on?'radial-gradient(circle at calc(100% - 9px) 50%, #FBF8F1 6px, transparent 6.5px)':'radial-gradient(circle at 9px 50%, #FBF8F1 6px, transparent 6.5px)' },
+    });
+    const toggles=[
+      mkToggle(S.batch,'批次模式 Batch','非同步 · 成本 −50%',()=>this.setState({batch:!S.batch})),
+      mkToggle(S.cache,'提示快取 Cache','重複前綴 · 輸入更省',()=>this.setState({cache:!S.cache})),
+    ];
+
+    const breakdown = S.batch
+      ? '批次非同步處理 · 不阻塞使用者'
+      : '首字 '+ttft.toFixed(1)+'s  +  生成 '+gen.toFixed(1)+'s';
+    const tail = S.batch ? '批次模式：使用者不等待，且 API 成本砍半，最適合「通話後」生成摘要。'
+      : total<=2 ? '延遲夠低，可即時顯示給客服，邊講邊看沒問題。'
+      : total<=4 ? '通話中會有明顯等待，建議用於「通話後」生成。'
+      : '延遲偏高，應採通話後批次生成，以延遲換取品質與成本。';
+    const hintText = '模型「'+M.vendor+' '+M.name+'」：單筆 '+total.toFixed(1)+'s、'+this.money(cost)+'／筆。'+tail;
+
+    const saveBadge = S.batch ? 'font-size:8.5px;font-weight:800;color:#1F2A12;background:#C8D49A;padding:2px 5px;border-radius:4px;letter-spacing:.5px;' : 'display:none;';
+
+    const simBtn = S.simPhase==='idle' ? '模擬客戶體驗' : (S.simPhase==='done' ? '重播' : '模擬中…');
+    const simStatus = S.simPhase==='idle' ? 'READY · 按播放鍵感受延遲'
+      : S.simPhase==='wait' ? 'WAITING FOR FIRST TOKEN…'
+      : S.simPhase==='type' ? 'STREAMING @ '+M.tps+' t/s'
+      : 'DONE · 總延遲 '+total.toFixed(1)+'s';
+
+    const ratio = cost>0 ? S.humanUSD/cost : 0;
+    const savePerUSD = S.humanUSD - cost;
+    const monthlySaveUSD = Math.max(0, savePerUSD)*S.volume;
+    const worth = cost < S.humanUSD;
+    const pct = S.revenueUSD>0 ? (cost/S.revenueUSD*100) : null;
+    const humanInput = S.currency==='TWD' ? Math.round(S.humanUSD*this.FX) : Math.round(S.humanUSD*100)/100;
+    const revInput = S.revenueUSD>0 ? (S.currency==='TWD' ? Math.round(S.revenueUSD*this.FX) : Math.round(S.revenueUSD*100)/100) : 0;
+
+    const monthlyCostLabel = this.moneyBig(cost*S.volume);
+    let ecoHeadline, ecoSub, leverHead, leverSub;
+    if(worth){
+      const r = Math.max(1, Math.round(ratio));
+      ecoHeadline = '每筆只要 '+this.money(cost)+'，約是人工（'+this.money(S.humanUSD)+'）的 1/'+r.toLocaleString('en-US')+' — 划算 ✓';
+      ecoSub = '以每月 '+S.volume.toLocaleString('en-US')+' 筆計，僅需極低算力成本即可完成海量定型化初篩作業。'+(pct!=null?(' AI 成本佔客單價 '+pct.toFixed(2)+'%。'):'');
+      leverHead = '每筆降維至 1/'+r.toLocaleString('en-US')+' 成本';
+      leverSub = '以每月 '+S.volume.toLocaleString('en-US')+' 筆估算，僅需 '+monthlyCostLabel+' 算力成本，即可全面分擔一線重複性定型化初篩作業。';
+    } else {
+      ecoHeadline = '每筆 '+this.money(cost)+'，已高於人工 '+this.money(S.humanUSD)+' — 不划算 ✗';
+      ecoSub = '換更小/更快的模型，或開啟批次與快取來壓低單筆成本'+(pct!=null?(' · AI 成本佔客單價 '+pct.toFixed(2)+'%'):'');
+      leverHead = '槓桿不足 · 成本高於人工';
+      leverSub = '每月 '+S.volume.toLocaleString('en-US')+' 筆需 '+monthlyCostLabel+' 算力成本，改用更小/更快模型或開啟批次以拉開槓桿。';
+    }
+
+    return {
+      latencyLabel: total.toFixed(1), ttftLabel: ttft.toFixed(1), breakdown,
+      costLabel: this.money(cost), monthlyLabel: this.moneyBig(cost*S.volume),
+      saveBadge, saveLabel: S.batch?'−50%':'',
+      sliders, vendorGroups, recName, segs, scenarios, pasteHint, currencies, toggles,
+      vLabel:v.label, vColor:v.color, vChipBg:v.chip, vBarColor:v.bar, verdictFill, hintText,
+      simBtn, simStatus, simText:S.simText, simWaiting:S.simPhase==='wait', simTyping:S.simPhase==='type',
+      runSim:()=>this.runSim(),
+      sym: S.currency==='TWD'?'NT$':'$', humanInput, revInput, onHuman:(e)=>this.onHuman(e), onRev:(e)=>this.onRev(e),
+      aiPerLabel:this.money(cost),
+      leverHead, leverSub, leverIcon: worth?'#9FD49E':'#E0967D', leverBd: worth?'rgba(159,212,158,.28)':'rgba(224,104,91,.34)',
+      ecoHeadline, ecoSub,
+      verdictBoxBg: worth?'rgba(63,156,68,.12)':'rgba(190,51,41,.14)',
+      verdictBoxBd: worth?'rgba(127,178,134,.35)':'rgba(224,104,91,.4)',
+      onPaste:(e)=>this.onPaste(e), reset:()=>this.reset(),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Hanken+Grotesk:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  @media (max-width:840px){ .lx-grid{ grid-template-columns:1fr !important; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; padding:52px 28px; display:flex; align-items:center; justify-content:center; background:radial-gradient(1300px 800px at 72% -8%, #F4F1E9 0%, #EBE6DA 52%, #E2DBCC 100%); font-family:'Hanken Grotesk','Noto Sans TC',sans-serif; color:#1C1A16;">
+
+  <div style="width:960px; max-width:100%; background:#FBFAF5; border-radius:18px; overflow:hidden; box-shadow:0 44px 80px -34px rgba(60,44,20,.36), 0 0 0 1px rgba(220,210,190,.7);">
+
+    <!-- HEADER -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 34px 22px; border-bottom:1px solid #EAE3D5;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="width:9px; height:9px; border-radius:50%; background:#D2552B;"></div>
+        <span style="font-size:14px; font-weight:700; letter-spacing:3.5px;">GENAI</span>
+        <span style="width:1px; height:18px; background:#E0D8C8;"></span>
+        <span style="font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:500; font-size:18px; color:#6F6A5C; letter-spacing:.2px;">Latency / Cost Studio</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="width:5px; height:5px; border-radius:50%; background:#C9C1AE;"></span>
+        <span style="font-size:10px; font-weight:600; letter-spacing:2px; color:#A29B8A;">示意值 · ILLUSTRATIVE</span>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="lx-grid" style="display:grid; grid-template-columns:1.04fr 0.96fr;">
+
+      <!-- LEFT : CONTROLS -->
+      <div style="padding:30px 34px 34px;">
+
+        <!-- MODEL -->
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+          <span style="font-size:11px; font-weight:700; letter-spacing:2.4px; color:#1C1A16;">MODEL</span>
+          <span style="font-size:12px; color:#A29B8A; font-weight:400;">模型選擇</span>
+          <span style="margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:600; letter-spacing:.3px; color:#D2552B; white-space:nowrap;">
+            <span style="width:5px; height:5px; border-radius:50%; background:#D2552B; flex-shrink:0;"></span>推薦 {{ recName }}
+          </span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <sc-for list="{{ vendorGroups }}" as="vg" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <span style="width:52px; flex-shrink:0; font-size:10px; font-weight:700; letter-spacing:1.5px; color:#9C9484;">{{ vg.vendor }}</span>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <sc-for list="{{ vg.models }}" as="m" hint-placeholder-count="2">
+                  <div onClick="{{ m.onClick }}" style="{{ m.style }}">
+                    <span>{{ m.name }}</span>
+                    <sc-if value="{{ m.rec }}" hint-placeholder-val="{{ false }}">
+                      <span style="width:5px; height:5px; border-radius:50%; background:#D2552B;"></span>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="height:1px; background:#EEE8DA; margin:24px 0;"></div>
+
+        <!-- PARAMETERS -->
+        <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:18px;">
+          <span style="font-size:11px; font-weight:700; letter-spacing:2.4px; color:#1C1A16;">PARAMETERS</span>
+          <span style="font-size:12px; color:#A29B8A; font-weight:400;">輸入參數</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+          <sc-for list="{{ sliders }}" as="s" hint-placeholder-count="4">
+            <div>
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:9px;">
+                <div>
+                  <div style="font-size:9px; font-weight:700; letter-spacing:1.6px; color:#B6AF9D;">{{ s.code }}</div>
+                  <div style="font-size:13px; font-weight:600; margin-top:2px; white-space:nowrap;">{{ s.cn }}<span style="font-size:11px; font-weight:300; color:#A29B8A;"> · {{ s.hint }}</span></div>
+                </div>
+                <div style="font-family:'Cormorant Garamond',serif; font-weight:600; font-size:23px; line-height:1; letter-spacing:.3px; white-space:nowrap;">{{ s.valLabel }}</div>
+              </div>
+              <div onPointerDown="{{ s.down }}" onPointerMove="{{ s.move }}" onPointerUp="{{ s.up }}" style="position:relative; height:18px; cursor:pointer; touch-action:none; user-select:none;">
+                <div style="position:absolute; top:50%; left:0; right:0; height:2px; transform:translateY(-50%); background:#E2DACA; border-radius:2px;"></div>
+                <div style="position:absolute; top:50%; left:0; height:2px; transform:translateY(-50%); width:{{ s.fill }}%; background:#D2552B; border-radius:2px;"></div>
+                <div style="position:absolute; top:50%; left:{{ s.fill }}%; width:15px; height:15px; transform:translate(-50%,-50%); background:#FBFAF5; border:1.5px solid #D2552B; border-radius:50%; box-shadow:0 2px 6px rgba(120,55,20,.26);"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:9.5px; color:#C2BBA9; font-weight:400; letter-spacing:.5px;">
+                <span>{{ s.minLabel }}</span><span>{{ s.maxLabel }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div onClick="{{ reset }}" style="margin-top:30px; display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:11.5px; font-weight:600; letter-spacing:.5px; color:#7A7466; border-bottom:1px solid #D8D0C0; padding-bottom:3px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D2552B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>
+          重設為客服專案預設
+        </div>
+
+      </div>
+
+      <!-- RIGHT : OUTPUT -->
+      <div style="padding:30px 34px 34px; background:#F4F0E6; border-left:1px solid #EAE3D5;">
+
+        <!-- DARK READOUT -->
+        <div style="background:linear-gradient(165deg,#23201B 0%,#1A1814 100%); border-radius:16px; padding:26px 28px 28px; color:#F2EDE2; box-shadow:0 20px 38px -20px rgba(40,28,12,.55);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:10px; font-weight:700; letter-spacing:2.6px; color:#8C8576;">OUTPUT</span>
+            <span style="display:flex; align-items:center; gap:6px; font-size:10px; font-weight:500; letter-spacing:1.4px; color:#8C8576;"><span style="width:6px;height:6px;border-radius:50%;background:#6FA873;"></span>LIVE</span>
+          </div>
+
+          <div style="margin-top:22px; font-size:10px; font-weight:600; letter-spacing:2px; color:#9C9484;">單筆延遲 · LATENCY</div>
+          <div style="display:flex; align-items:flex-end; gap:14px; margin-top:6px;">
+            <span style="font-family:'Cormorant Garamond',serif; font-weight:400; font-size:82px; line-height:.82; flex-shrink:0;">{{ latencyLabel }}</span>
+            <span style="font-family:'Cormorant Garamond',serif; font-weight:400; font-size:28px; color:#B7AF9E; margin-bottom:11px;">sec</span>
+            <span style="margin-left:auto; margin-bottom:13px; font-size:11px; font-weight:600; letter-spacing:.5px; padding:5px 12px; border-radius:20px; color:{{ vColor }}; background:{{ vChipBg }}; border:1px solid {{ vChipBd }};">{{ vLabel }}</span>
+          </div>
+
+          <div style="position:relative; height:3px; border-radius:2px; background:rgba(242,237,226,.14); margin:22px 0 24px;">
+            <div style="position:absolute; left:0; top:0; height:3px; border-radius:2px; width:{{ verdictFill }}%; background:{{ vBarColor }};"></div>
+            <div style="position:absolute; top:50%; left:{{ verdictFill }}%; width:9px; height:9px; transform:translate(-50%,-50%); border-radius:50%; background:#F2EDE2; box-shadow:0 0 0 2px {{ vBarColor }};"></div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+            <div>
+              <div style="font-size:9.5px; font-weight:600; letter-spacing:1.6px; color:#8C8576;">COST / REQ</div>
+              <div style="font-size:10px; font-weight:300; color:#6E685B; margin-top:2px; font-family:'Noto Sans TC',sans-serif;">單筆成本</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:34px; line-height:1; margin-top:9px; color:#F2EDE2;">{{ costLabel }}</div>
+            </div>
+            <div style="padding-left:24px; border-left:1px solid rgba(242,237,226,.13);">
+              <div style="font-size:9.5px; font-weight:600; letter-spacing:1.6px; color:#8C8576;">MONTHLY</div>
+              <div style="font-size:10px; font-weight:300; color:#6E685B; margin-top:2px; font-family:'Noto Sans TC',sans-serif;">每月總成本</div>
+              <div style="font-family:'Cormorant Garamond',serif; font-weight:500; font-size:34px; line-height:1; margin-top:9px; color:#F2EDE2;">{{ monthlyLabel }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VERDICT -->
+        <div style="margin-top:24px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <span style="font-size:11px; font-weight:700; letter-spacing:2.4px;">DEPLOY MODE</span>
+            <span style="font-size:11px; font-weight:600; letter-spacing:.4px; color:{{ lightColor }};">{{ vLabel }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin:16px 0 8px; font-size:9.5px; font-weight:600; letter-spacing:1.4px; color:#A29B8A;">
+            <span>即時 REAL-TIME</span><span>批次 BATCH</span>
+          </div>
+          <div style="position:relative; height:2px; background:#E2DACA; border-radius:2px;">
+            <div style="position:absolute; left:0; top:0; height:2px; width:{{ verdictFill }}%; background:{{ lightBar }}; border-radius:2px;"></div>
+            <div style="position:absolute; top:50%; left:{{ verdictFill }}%; width:11px; height:11px; transform:translate(-50%,-50%); border-radius:50%; background:#FBFAF5; box-shadow:0 0 0 1.5px {{ lightBar }}, 0 1px 4px rgba(0,0,0,.12);"></div>
+            <div style="position:absolute; top:50%; left:33.3%; width:1px; height:9px; transform:translate(-50%,-50%); background:#D6CEBE;"></div>
+            <div style="position:absolute; top:50%; left:66.6%; width:1px; height:9px; transform:translate(-50%,-50%); background:#D6CEBE;"></div>
+          </div>
+          <p style="margin:18px 0 0; font-family:'Noto Sans TC',sans-serif; font-size:12.5px; font-weight:300; line-height:1.85; color:#5E594D;">{{ hintText }}</p>
+        </div>
+
+        <div style="height:1px; background:#EAE3D5; margin:24px 0 16px;"></div>
+
+        <div style="font-size:10.5px; font-weight:300; line-height:1.9; color:#A29B8A; font-family:'Noto Sans TC',sans-serif; letter-spacing:.2px;">
+          <div>延遲 ≈ 輸出 token ÷ 生成速度（TPS）</div>
+          <div>成本 = 輸入 · 輸出 token × 各自單價</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:960,&quot;height&quot;:660},&quot;defaultModel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;claude-haiku&quot;,&quot;claude-sonnet&quot;,&quot;claude-opus&quot;,&quot;gemini-flash&quot;,&quot;gemini-pro&quot;,&quot;gpt-mini&quot;,&quot;gpt-4o&quot;],&quot;default&quot;:&quot;claude-haiku&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;monthlyVolume&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:50000,&quot;min&quot;:1000,&quot;max&quot;:500000,&quot;step&quot;:1000,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  REC = 'claude-haiku';
+  VENDOR_ORDER = ['Claude','Gemini','GPT'];
+  CATALOG = {
+    'claude-haiku':  { vendor:'Claude', name:'Haiku',   inP:0.25,  outP:1.25,  tps:150 },
+    'claude-sonnet': { vendor:'Claude', name:'Sonnet',  inP:3.00,  outP:15.00, tps:75  },
+    'claude-opus':   { vendor:'Claude', name:'Opus',    inP:15.00, outP:75.00, tps:42  },
+    'gemini-flash':  { vendor:'Gemini', name:'Flash',   inP:0.075, outP:0.30,  tps:185 },
+    'gemini-pro':    { vendor:'Gemini', name:'Pro',     inP:1.25,  outP:5.00,  tps:90  },
+    'gpt-mini':      { vendor:'GPT',    name:'4o-mini', inP:0.15,  outP:0.60,  tps:160 },
+    'gpt-4o':        { vendor:'GPT',    name:'4o',      inP:2.50,  outP:10.00, tps:85  },
+  };
+  RANGES = {
+    inTok:  { min:100,  max:4000,   step:50   },
+    outTok: { min:50,   max:2000,   step:25   },
+    tps:    { min:10,   max:300,    step:5    },
+    volume: { min:1000, max:500000, step:1000 },
+  };
+  META = {
+    inTok:  { code:'INPUT TOKENS',  cn:'輸入 token', hint:'對話長度' },
+    outTok: { code:'OUTPUT TOKENS', cn:'輸出 token', hint:'摘要長度' },
+    tps:    { code:'THROUGHPUT',    cn:'生成速度 TPS', hint:'字 / 秒' },
+    volume: { code:'VOLUME / MO',   cn:'每月案件量',  hint:'筆 / 月' },
+  };
+
+  state = {
+    model: this.CATALOG[this.props.defaultModel] ? this.props.defaultModel : this.REC,
+    inTok: 700,
+    outTok: 200,
+    tps: (this.CATALOG[this.props.defaultModel] || this.CATALOG[this.REC]).tps,
+    volume: this.props.monthlyVolume || 50000,
+  };
+
+  selectModel(key){
+    const m = this.CATALOG[key];
+    if(!m) return;
+    this.setState({ model:key, tps:m.tps });
+  }
+  reset(){
+    this.setState({ model:this.REC, inTok:700, outTok:200, tps:this.CATALOG[this.REC].tps, volume:50000 });
+  }
+
+  onDown(key,e){
+    try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(_){}
+    this._track = e.currentTarget; this._key = key;
+    this.apply(e.clientX);
+  }
+  onMove(e){ if(this._track && (e.buttons & 1)) this.apply(e.clientX); }
+  onUp(e){
+    try{ e.currentTarget.releasePointerCapture(e.pointerId); }catch(_){}
+    this._track = null; this._key = null;
+  }
+  apply(x){
+    if(!this._track || !this._key) return;
+    const r = this._track.getBoundingClientRect();
+    let f = (x - r.left) / r.width;
+    f = Math.max(0, Math.min(1, f));
+    const rg = this.RANGES[this._key];
+    let v = rg.min + f * (rg.max - rg.min);
+    v = Math.round(v / rg.step) * rg.step;
+    v = Math.max(rg.min, Math.min(rg.max, v));
+    this.setState({ [this._key]: v });
+  }
+
+  fmtCost(c){
+    if(c >= 1) return c.toFixed(2);
+    if(c >= 0.001) return c.toFixed(4);
+    return c.toFixed(5);
+  }
+
+  renderVals(){
+    const S = this.state;
+    const M = this.CATALOG[S.model];
+
+    const latency = S.outTok / S.tps;
+    const cost = (S.inTok / 1e6) * M.inP + (S.outTok / 1e6) * M.outP;
+    const monthly = cost * S.volume;
+
+    let v;
+    if(latency <= 2)      v = { label:'即時可用', color:'#7FB286', chip:'rgba(127,178,134,.12)', chipBd:'rgba(127,178,134,.32)', bar:'#6FA873' };
+    else if(latency <= 4) v = { label:'可接受',   color:'#D9A04A', chip:'rgba(217,160,74,.12)',  chipBd:'rgba(217,160,74,.32)',  bar:'#C99238' };
+    else                  v = { label:'建議批次', color:'#E07A52', chip:'rgba(224,122,82,.12)',  chipBd:'rgba(224,122,82,.34)',  bar:'#D2552B' };
+
+    // light-card verdict uses warmer/darker variants for contrast on cream
+    const lightColor = latency <= 2 ? '#3E6B4A' : latency <= 4 ? '#9A6A1E' : '#B0492C';
+    const lightBar   = latency <= 2 ? '#4F7B5A' : latency <= 4 ? '#C08A2E' : '#C25733';
+
+    const latNorm = Math.max(0, Math.min(1, latency / 6));
+
+    const sliders = Object.keys(this.RANGES).map(key => {
+      const rg = this.RANGES[key], val = S[key];
+      const fill = Math.round(((val - rg.min) / (rg.max - rg.min)) * 1000) / 10;
+      return {
+        key,
+        code: this.META[key].code, cn: this.META[key].cn, hint: this.META[key].hint,
+        valLabel: val.toLocaleString('en-US'),
+        minLabel: rg.min.toLocaleString('en-US'),
+        maxLabel: rg.max.toLocaleString('en-US'),
+        fill,
+        down:(e)=>this.onDown(key,e),
+        move:(e)=>this.onMove(e),
+        up:(e)=>this.onUp(e),
+      };
+    });
+
+    const pillBase = {
+      display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 13px',
+      borderRadius:'9px', fontSize:'12.5px', fontWeight:600, cursor:'pointer',
+      border:'1px solid #E6DFD0', background:'#FBFAF5', color:'#3A372F',
+      transition:'all .14s ease', fontFamily:"'Hanken Grotesk','Noto Sans TC',sans-serif",
+    };
+    const pillSel = { ...pillBase, border:'1px solid #D2552B', background:'#FFFFFF', color:'#1C1A16', boxShadow:'0 5px 14px -7px rgba(210,85,43,.5)' };
+    const vendorGroups = this.VENDOR_ORDER.map(vendor => ({
+      vendor,
+      models: Object.keys(this.CATALOG).filter(id => this.CATALOG[id].vendor === vendor).map(id => {
+        const sel = id === S.model;
+        return { id, name:this.CATALOG[id].name, rec:id === this.REC, onClick:()=>this.selectModel(id), style: sel ? pillSel : pillBase };
+      }),
+    }));
+    const recName = this.CATALOG[this.REC].vendor + ' ' + this.CATALOG[this.REC].name;
+
+    const tail = latency <= 2 ? '延遲夠低，可即時顯示給客服，邊講邊看沒問題。'
+               : latency <= 4 ? '通話中會有明顯等待，建議用於「通話後」生成。'
+               : '延遲偏高，應採通話後批次生成，以延遲換取品質與成本。';
+    const hintText = `模型「${M.vendor} ${M.name}」：單筆 ${latency.toFixed(1)} 秒、${'$'+this.fmtCost(cost)}／筆、月成本 ${'$'+Math.round(monthly).toLocaleString('en-US')}。${tail}`;
+
+    return {
+      latencyLabel: latency.toFixed(1),
+      costLabel: '$' + this.fmtCost(cost),
+      monthlyLabel: '$' + Math.round(monthly).toLocaleString('en-US'),
+      sliders, vendorGroups, recName,
+      vLabel: v.label, vColor: v.color, vChipBg: v.chip, vChipBd: v.chipBd, vBarColor: v.bar,
+      lightColor, lightBar,
+      verdictFill: Math.round(latNorm * 1000) / 10,
+      hintText,
+      reset:()=>this.reset(),
+    };
+  }
+}
+</script>
+</body>
+</html>

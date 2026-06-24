@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  @media (max-width:820px){ .cos-grid{ grid-template-columns:1fr !important; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; padding:44px 28px; display:flex; align-items:center; justify-content:center; background:radial-gradient(1200px 700px at 70% -10%, #EFEADD 0%, #E2DCCC 55%, #D8D0BD 100%); font-family:'JetBrains Mono','Noto Sans TC',ui-monospace,monospace; color:#26241F;">
+
+  <div style="width:940px; max-width:100%; background:#F4F0E6; border-radius:24px; overflow:hidden; box-shadow:0 38px 70px -26px rgba(72,48,22,.42), 0 1.5px 0 #FFFDF7 inset, 0 0 0 1px #E4DDCC;">
+
+    <!-- HEADER -->
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px; background:#F8F5EE; border-bottom:2.5px solid #A82B26;">
+      <div style="display:flex; align-items:center; gap:11px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A82B26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2.5"/><path d="M7 9l3 3-3 3"/><path d="M13.5 15H17"/></svg>
+        <span style="font-weight:800; font-size:15px; letter-spacing:1.5px; white-space:nowrap;">GENAI · CALC-OS</span>
+        <span style="font-size:11px; font-weight:500; color:#9A9384; letter-spacing:1px;">V1.0</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="font-size:10px; font-weight:700; letter-spacing:1.4px; color:#A82B26; border:1.5px solid #E1B8B4; background:#FBF1F0; padding:4px 9px; border-radius:6px;">示意值 · ILLUSTRATIVE</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#26241F" stroke-width="1.8" stroke-linecap="round"><line x1="6" y1="3" x2="6" y2="21"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="18" y1="3" x2="18" y2="21"/><circle cx="6" cy="8" r="2.4" fill="#F8F5EE"/><circle cx="12" cy="15" r="2.4" fill="#F8F5EE"/><circle cx="18" cy="7" r="2.4" fill="#F8F5EE"/></svg>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="cos-grid" style="display:grid; grid-template-columns:1.05fr 0.95fr;">
+
+      <!-- LEFT: CONTROLS -->
+      <div style="padding:22px 24px 26px;">
+
+        <!-- MODEL SELECT -->
+        <div style="display:flex; align-items:center; gap:9px; margin-bottom:14px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#26241F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></svg>
+          <span style="font-size:12.5px; font-weight:700; letter-spacing:1.4px;">MODEL SELECT</span>
+          <span style="font-size:11px; color:#9A9384; font-weight:500;">模型選擇</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
+          <sc-for list="{{ models }}" as="m" hint-placeholder-count="3">
+            <div onClick="{{ m.onClick }}" style="{{ m.style }}">
+              <div style="font-size:26px; font-weight:800; line-height:1; margin-bottom:7px;">{{ m.big }}</div>
+              <div style="font-size:13px; font-weight:700; margin-bottom:3px;">{{ m.name }}</div>
+              <div style="font-size:10px; color:#9A9384; font-weight:500; letter-spacing:.3px;">{{ m.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- INPUT PARAMETERS -->
+        <div style="display:flex; align-items:center; gap:9px; margin:26px 0 16px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#26241F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.4" fill="#F4F0E6"/><circle cx="15" cy="16" r="2.4" fill="#F4F0E6"/></svg>
+          <span style="font-size:12.5px; font-weight:700; letter-spacing:1.4px;">INPUT PARAMETERS</span>
+          <span style="font-size:11px; color:#9A9384; font-weight:500;">輸入參數</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <sc-for list="{{ sliders }}" as="s" hint-placeholder-count="4">
+            <div>
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:10px;">
+                <div>
+                  <div style="font-size:10px; font-weight:700; letter-spacing:1.3px; color:#A39B8B;">{{ s.code }}</div>
+                  <div style="font-size:13.5px; font-weight:700; margin-top:2px; white-space:nowrap;">{{ s.cn }}<span style="font-size:11px; font-weight:400; color:#9A9384;"> · {{ s.hint }}</span></div>
+                </div>
+                <div style="font-size:20px; font-weight:800; color:#A82B26; letter-spacing:.5px; white-space:nowrap;">{{ s.valLabel }}</div>
+              </div>
+              <div onPointerDown="{{ s.down }}" onPointerMove="{{ s.move }}" onPointerUp="{{ s.up }}" style="position:relative; height:28px; cursor:pointer; touch-action:none; user-select:none;">
+                <div style="position:absolute; top:50%; left:0; right:0; height:7px; transform:translateY(-50%); background:#DBD4C5; border-radius:4px; box-shadow:inset 0 1px 2px rgba(90,70,40,.18);"></div>
+                <div style="position:absolute; top:50%; left:0; height:7px; transform:translateY(-50%); width:{{ s.fill }}%; background:linear-gradient(#B6332C,#9A241F); border-radius:4px;"></div>
+                <div style="position:absolute; top:50%; left:{{ s.fill }}%; width:18px; height:28px; transform:translate(-50%,-50%); background:#FBF8F1; border:2px solid #A82B26; border-bottom-width:4px; border-radius:6px; box-shadow:0 2px 5px rgba(120,40,30,.28);"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:7px; font-size:10px; color:#B3AC9C; font-weight:500; letter-spacing:.5px;">
+                <span>{{ s.minLabel }}</span><span>{{ s.maxLabel }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- RESET -->
+        <div onClick="{{ reset }}" style="margin-top:24px; display:flex; align-items:center; justify-content:center; gap:9px; padding:13px; background:#F8F5EE; border:2px solid #DDD6C8; border-bottom-width:4px; border-bottom-color:#C7BFAE; border-radius:13px; cursor:pointer; font-weight:700; font-size:12.5px; letter-spacing:.5px; color:#3A372F;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A82B26" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>
+          重設為客服專案預設
+        </div>
+
+      </div>
+
+      <!-- RIGHT: OUTPUT -->
+      <div style="padding:22px 24px 26px; background:#EDE8DC; border-left:2px dashed #D6CEBE;">
+
+        <!-- LCD PANEL -->
+        <div style="background:linear-gradient(158deg,#ABB28C 0%,#9AA478 100%); border-radius:18px; padding:18px 20px 20px; color:#293015; box-shadow:inset 0 2px 7px rgba(45,55,22,.32), inset 0 0 0 2px rgba(255,255,255,.16), 0 6px 14px -6px rgba(70,80,40,.4);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:11px; font-weight:700; letter-spacing:2px; color:#3C461F;">SYS.OUTPUT</span>
+            <svg width="18" height="14" viewBox="0 0 24 18" fill="none" stroke="#3C461F" stroke-width="2" stroke-linecap="round"><path d="M2 7a14 14 0 0 1 20 0"/><path d="M5.5 11a9 9 0 0 1 13 0"/><circle cx="12" cy="15" r="1.6" fill="#3C461F" stroke="none"/></svg>
+          </div>
+          <div style="height:1px; background:repeating-linear-gradient(90deg,#3C461F 0 5px,transparent 5px 9px); opacity:.5; margin:13px 0 14px;"></div>
+
+          <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:#3C461F;">單筆延遲 · LATENCY</div>
+          <div style="display:flex; align-items:flex-end; gap:8px; margin-top:3px;">
+            <span style="font-size:54px; font-weight:800; line-height:.92; letter-spacing:-1px;">{{ latencyLabel }}</span>
+            <span style="font-size:22px; font-weight:700; margin-bottom:6px;">s</span>
+            <span style="margin-left:auto; margin-bottom:9px; font-size:11px; font-weight:700; letter-spacing:.8px; padding:4px 9px; border-radius:6px; color:{{ vColor }}; background:{{ vChipBg }};">{{ vLabel }}</span>
+          </div>
+
+          <div style="display:flex; gap:3px; margin:14px 0 16px;">
+            <sc-for list="{{ segs }}" as="g" hint-placeholder-count="14">
+              <div style="flex:1; height:13px; border-radius:2px; background:{{ g.color }};"></div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px;">
+            <div style="background:#2E3719; border-radius:10px; padding:11px 13px;">
+              <div style="font-size:9.5px; font-weight:700; letter-spacing:1.2px; color:#9FAA77;">COST / REQ</div>
+              <div style="font-size:9.5px; color:#7E8A58; margin-top:1px;">單筆成本</div>
+              <div style="font-size:23px; font-weight:800; color:#D3DCAE; margin-top:6px; letter-spacing:.3px;">{{ costLabel }}</div>
+            </div>
+            <div style="background:#2E3719; border-radius:10px; padding:11px 13px;">
+              <div style="font-size:9.5px; font-weight:700; letter-spacing:1.2px; color:#9FAA77;">MONTHLY</div>
+              <div style="font-size:9.5px; color:#7E8A58; margin-top:1px;">每月總成本</div>
+              <div style="font-size:23px; font-weight:800; color:#D3DCAE; margin-top:6px; letter-spacing:.3px;">{{ monthlyLabel }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEPLOY VERDICT -->
+        <div style="margin-top:18px; background:#F8F5EE; border:2px solid #E4DDCC; border-bottom-width:4px; border-bottom-color:#D6CEBE; border-radius:16px; padding:16px 18px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A82B26" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r="0.6" fill="#A82B26"/></svg>
+              <span style="font-size:12px; font-weight:700; letter-spacing:1.2px;">DEPLOY MODE</span>
+              <span style="font-size:11px; color:#9A9384;">部署建議</span>
+            </div>
+            <span style="font-size:11px; font-weight:700; letter-spacing:.6px; padding:4px 10px; border-radius:6px; color:{{ vColor }}; background:{{ vChipBg }};">{{ vLabel }}</span>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; margin:14px 0 7px; font-size:10px; font-weight:700; letter-spacing:.6px; color:#9A9384;">
+            <span>即時 REAL-TIME</span><span>批次 BATCH</span>
+          </div>
+          <div style="position:relative; height:14px; border-radius:7px; background:repeating-linear-gradient(90deg,#E4DDCC 0 4px,transparent 4px 8px); box-shadow:inset 0 0 0 1.5px #E4DDCC;">
+            <div style="position:absolute; top:0; left:0; height:14px; width:{{ verdictFill }}%; background:{{ vBarColor }}; border-radius:7px;"></div>
+            <div style="position:absolute; top:50%; left:33.3%; width:1.5px; height:18px; transform:translate(-50%,-50%); background:#C7BFAE;"></div>
+            <div style="position:absolute; top:50%; left:66.6%; width:1.5px; height:18px; transform:translate(-50%,-50%); background:#C7BFAE;"></div>
+          </div>
+
+          <p style="margin:14px 0 0; font-family:'Noto Sans TC',sans-serif; font-size:12.5px; line-height:1.7; color:#5C5648;">{{ hintText }}</p>
+        </div>
+
+        <!-- FORMULA FOOTNOTE -->
+        <div style="margin-top:16px; font-size:10.5px; line-height:1.8; color:#9A9384; letter-spacing:.3px;">
+          <div>延遲 ≈ 輸出 token ÷ 生成速度(TPS)</div>
+          <div>成本 = 輸入·輸出 token × 各自單價</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:940,&quot;height&quot;:680},&quot;defaultModel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;small&quot;,&quot;medium&quot;,&quot;large&quot;],&quot;default&quot;:&quot;medium&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;monthlyVolume&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:50000,&quot;min&quot;:1000,&quot;max&quot;:500000,&quot;step&quot;:1000,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  MODELS = {
+    small:  { big:'S', label:'小模型', sub:'快·便宜·普', inP:0.15, outP:0.60, tps:150 },
+    medium: { big:'M', label:'中模型', sub:'平衡',       inP:1.00, outP:4.00, tps:80  },
+    large:  { big:'L', label:'大模型', sub:'慢·貴·品質高', inP:3.00, outP:15.00, tps:40 },
+  };
+  RANGES = {
+    inTok:  { min:100,  max:4000,   step:50   },
+    outTok: { min:50,   max:2000,   step:25   },
+    tps:    { min:10,   max:300,    step:5    },
+    volume: { min:1000, max:500000, step:1000 },
+  };
+  META = {
+    inTok:  { code:'INPUT_TOKENS',  cn:'輸入 token', hint:'對話長度' },
+    outTok: { code:'OUTPUT_TOKENS', cn:'輸出 token', hint:'摘要長度' },
+    tps:    { code:'THROUGHPUT',    cn:'生成速度 TPS', hint:'字 / 秒' },
+    volume: { code:'VOLUME / MO',   cn:'每月案件量',  hint:'筆 / 月' },
+  };
+
+  state = {
+    model: this.MODELS[this.props.defaultModel] ? this.props.defaultModel : 'medium',
+    inTok: 700,
+    outTok: 200,
+    tps: (this.MODELS[this.props.defaultModel] || this.MODELS.medium).tps,
+    volume: this.props.monthlyVolume || 50000,
+  };
+
+  selectModel(key){
+    const m = this.MODELS[key];
+    if(!m) return;
+    this.setState({ model:key, tps:m.tps });
+  }
+  reset(){
+    this.setState({ model:'medium', inTok:700, outTok:200, tps:80, volume:50000 });
+  }
+
+  onDown(key,e){
+    try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(_){}
+    this._track = e.currentTarget; this._key = key;
+    this.apply(e.clientX);
+  }
+  onMove(e){ if(this._track && (e.buttons & 1)) this.apply(e.clientX); }
+  onUp(e){
+    try{ e.currentTarget.releasePointerCapture(e.pointerId); }catch(_){}
+    this._track = null; this._key = null;
+  }
+  apply(x){
+    if(!this._track || !this._key) return;
+    const r = this._track.getBoundingClientRect();
+    let f = (x - r.left) / r.width;
+    f = Math.max(0, Math.min(1, f));
+    const rg = this.RANGES[this._key];
+    let v = rg.min + f * (rg.max - rg.min);
+    v = Math.round(v / rg.step) * rg.step;
+    v = Math.max(rg.min, Math.min(rg.max, v));
+    this.setState({ [this._key]: v });
+  }
+
+  fmtCost(c){
+    if(c >= 1) return c.toFixed(2);
+    if(c >= 0.001) return c.toFixed(4);
+    return c.toFixed(5);
+  }
+
+  renderVals(){
+    const S = this.state;
+    const M = this.MODELS[S.model];
+
+    const latency = S.outTok / S.tps;
+    const cost = (S.inTok / 1e6) * M.inP + (S.outTok / 1e6) * M.outP;
+    const monthly = cost * S.volume;
+
+    let v;
+    if(latency <= 2)      v = { label:'即時可用', color:'#2E7D32', chip:'rgba(46,125,50,.14)', bar:'#3F9C44' };
+    else if(latency <= 4) v = { label:'可接受',   color:'#B0791A', chip:'rgba(176,121,26,.16)', bar:'#D08A1E' };
+    else                  v = { label:'建議批次', color:'#A82B26', chip:'rgba(168,43,38,.13)', bar:'#BE3329' };
+
+    const latNorm = Math.max(0, Math.min(1, latency / 6));
+    const segN = 14, segOn = Math.round(latNorm * segN);
+    const segs = [];
+    for(let i=0; i<segN; i++) segs.push({ color: i < segOn ? v.bar : 'rgba(42,50,23,.18)' });
+
+    const sliders = Object.keys(this.RANGES).map(key => {
+      const rg = this.RANGES[key], val = S[key];
+      const fill = Math.round(((val - rg.min) / (rg.max - rg.min)) * 1000) / 10;
+      return {
+        key,
+        code: this.META[key].code, cn: this.META[key].cn, hint: this.META[key].hint,
+        valLabel: val.toLocaleString('en-US'),
+        minLabel: rg.min.toLocaleString('en-US'),
+        maxLabel: rg.max.toLocaleString('en-US'),
+        fill,
+        down:(e)=>this.onDown(key,e),
+        move:(e)=>this.onMove(e),
+        up:(e)=>this.onUp(e),
+      };
+    });
+
+    const baseStyle = {
+      borderRadius:'14px', padding:'14px 6px', textAlign:'center', cursor:'pointer',
+      transition:'all .12s ease', fontFamily:"'JetBrains Mono','Noto Sans TC',monospace",
+    };
+    const models = Object.keys(this.MODELS).map(key => {
+      const m = this.MODELS[key], sel = key === S.model;
+      const style = sel
+        ? { ...baseStyle, background:'#F0EBDF', border:'2px solid #A82B26', borderBottomWidth:'4px', color:'#A82B26', boxShadow:'inset 0 2px 6px rgba(130,32,24,.18)' }
+        : { ...baseStyle, background:'#F8F5EE', border:'2px solid #DDD6C8', borderBottomWidth:'4px', borderBottomColor:'#C7BFAE', color:'#3A372F' };
+      return { key, big:m.big, name:m.label, sub:m.sub, onClick:()=>this.selectModel(key), style };
+    });
+
+    const tail = latency <= 2 ? '延遲夠低，可即時顯示給客服，邊講邊看沒問題。'
+               : latency <= 4 ? '通話中會有明顯等待，建議用於「通話後」生成。'
+               : '延遲偏高，應採通話後批次生成，以延遲換取品質與成本。';
+    const hintText = `模型「${M.label}」：單筆 ${latency.toFixed(1)} 秒、${'$'+this.fmtCost(cost)}／筆、月成本 ${'$'+Math.round(monthly).toLocaleString('en-US')}。${tail}`;
+
+    return {
+      latencyLabel: latency.toFixed(1),
+      costLabel: '$' + this.fmtCost(cost),
+      monthlyLabel: '$' + Math.round(monthly).toLocaleString('en-US'),
+      sliders, segs, models,
+      vLabel: v.label, vColor: v.color, vChipBg: v.chip, vBarColor: v.bar,
+      verdictFill: Math.round(latNorm * 1000) / 10,
+      hintText,
+      reset:()=>this.reset(),
+    };
+  }
+}
+</script>
+</body>
+</html>
